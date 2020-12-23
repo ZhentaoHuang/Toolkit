@@ -13,6 +13,7 @@
 #include<iostream>
 #include <random>
 #include <algorithm>
+#include <math.h>
 
 //#include <cv.h>
 #include <opencv2/opencv.hpp>
@@ -24,14 +25,20 @@
 //#include "easylogging.h"
 
 
-using namespace std;
+
 //using namespace Eigen;
 //string to_string(T value);
-cv::Mat adjustBrightness(cv::Mat in_image, float alpha, float beta);
-cv::Mat gammaCorrection(const cv::Mat in_image, float gamma);
-cv::Mat readImg();
+namespace speedbot2d{
 
+cv::Mat AdjustBrightness(cv::Mat in_image, float alpha, float beta);
+cv::Mat GammaCorrection(const cv::Mat in_image, float gamma);
+cv::Mat ReadImg();
+int WriteImg(cv::Mat in_image);
+cv::Mat StretchContrast(const cv::Mat in_image);
+cv::Mat GetHistogram(const cv::Mat& image);
+int ComputeThresholdHuang(cv::Mat hist);
 
+}
 
 
 
