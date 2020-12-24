@@ -6,7 +6,6 @@
 #include "imgproc.h"
 
 
-
 namespace speedbot2d{
 
 
@@ -79,7 +78,7 @@ cv::Mat GammaCorrection(const cv::Mat in_image, float gamma=2.5)
  */
 cv::Mat ReadImg()
 {
-	cv::Mat out_image = cv::imread("../data/Crayfish_low_contrast.jpeg", cv::IMREAD_UNCHANGED);
+	cv::Mat out_image = cv::imread("../data/autothres.png", cv::IMREAD_UNCHANGED);
 
 	return out_image;
 }
@@ -251,7 +250,6 @@ int ComputeThresholdHuang(cv::Mat hist)
 
 		mu = round((W[last] - W[threshold]) / (S[last] - S[threshold]));
 		for (size_t i = threshold + 1; i <= last; i++) {
-			std::cout<<(size_t)std::abs((int)i - mu)<<" "<<(W[last] - W[threshold]) / (S[last] - S[threshold])<<std::endl;
 			entropy += Smu[(size_t)std::abs((int)i - mu)] * hist.at<float>((unsigned char)i);
 		}
 
@@ -262,6 +260,102 @@ int ComputeThresholdHuang(cv::Mat hist)
 	}
 
 	return bestThreshold;
+
+
+}
+
+
+/**
+ * @brief 将灰度图片根据阈值进行二值/三值化
+ * 				如果小于threshold1则设为value1,大于threshold2则设为value3,中间设为value2
+ * 
+ * @param in_image 输入图片
+ * @param threshold1 阈值1
+ * @param threshold2 阈值2
+ * @param value1 设定值1
+ * @param value2 设定值2
+ * @param value3 设定值3
+ * @return cv::Mat 
+ */
+cv::Mat Binarise(const cv::Mat in_image, unsigned char threshold1, unsigned char threshold2, unsigned char value1, unsigned char value2, unsigned char value3)
+{
+
+	cv::Mat out_image = cv::Mat::zeros(in_image.size(), in_image.type());  //创建一个和原图像大小相同，类型相同，像素值为0的图像
+	//对每个像素点的操作
+	for (int i = 0; i < in_image.rows; i++) {
+		for (int j = 0; j < in_image.cols; j++) {
+			if (in_image.channels() == 1) { //如果是灰度图像
+				if( in_image.at<uchar>(i,j) < threshold1 ){
+					std::cout<<out_image.at<uchar>(i,j)<<std::endl;
+					out_image.at<uchar>(i,j) = cv::saturate_cast<uchar>(value1);
+					
+				} else if ( in_image.at<uchar>(i,j) > threshold2) {
+
+					out_image.at<uchar>(i,j) = cv::saturate_cast<uchar>(value3);
+
+				} else {
+					std::cout<<1<<std::endl;
+					out_image.at<uchar>(i,j) = cv::saturate_cast<uchar>(value2);
+
+				}
+				
+				
+			}
+		}
+	}
+	
+    return out_image;
+
+
+
+}
+
+
+
+cv::Mat AutoThresholding(const cv::Mat in_image, AutoThresholdMethod method)
+{
+	int threshold = -1; 
+
+	cv::Mat hist = GetHistogram(in_image);
+
+	switch (method) {
+	case AUTO_THRESHOLD_HUANG:
+		std::cout<<7666<<std::endl; 	
+		threshold = ComputeThresholdHuang(hist);
+		std::cout<<threshold<<std::endl; 
+		break;
+
+ 	// case AUTO_THRESHOLD_INTERMODES:
+	// 	threshold = computeThresholdIntermodes(histogram);
+	// 	break;
+
+	// case AUTO_THRESHOLD_ISODATA:
+	// 	threshold = computeThresholdIsoData(histogram, I.getSize());
+	// 	break;
+
+	// case AUTO_THRESHOLD_MEAN:
+	// 	threshold = computeThresholdMean(histogram, I.getSize());
+	// 	break;
+
+	// case AUTO_THRESHOLD_OTSU:
+	// 	threshold = computeThresholdOtsu(histogram, I.getSize());
+	// 	break;
+
+	// case AUTO_THRESHOLD_TRIANGLE:
+	// 	threshold = computeThresholdTriangle(histogram);
+	// 	break;
+
+	default:
+		break;
+	}
+
+	cv::Mat out_image = in_image;
+   if (threshold != -1) {
+     // Threshold
+     out_image = Binarise(in_image, (unsigned char)threshold, (unsigned char)255, 0, 255, 255);
+   }
+
+	return out_image;
 
 
 }
