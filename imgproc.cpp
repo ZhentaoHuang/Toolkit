@@ -286,7 +286,7 @@ cv::Mat Binarise(const cv::Mat in_image, unsigned char threshold1, unsigned char
 		for (int j = 0; j < in_image.cols; j++) {
 			if (in_image.channels() == 1) { //如果是灰度图像
 				if( in_image.at<uchar>(i,j) < threshold1 ){
-					std::cout<<out_image.at<uchar>(i,j)<<std::endl;
+				
 					out_image.at<uchar>(i,j) = cv::saturate_cast<uchar>(value1);
 					
 				} else if ( in_image.at<uchar>(i,j) > threshold2) {
