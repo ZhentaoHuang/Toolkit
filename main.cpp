@@ -26,146 +26,124 @@ int main(int agrc, char* argv[]) {
 					std::string str_action = req.get_param_value("action");
 					json action = json::parse(str_action);
 
-					if (action["function"] == "AdjustBrightness") {	// 调用的是函数 aaa
+					//AdjustBrightness 调整图片的亮度和对比度
+					if (action["function"] == "AdjustBrightness") {		// 调用的是函数 aaa
             
-            auto params = action["params"];	// 取出参数（其实就是个数组，参数是按顺序的，分别是参数一、参数二、参数三。。。）
+            auto params = action["params"];									// 取出参数（其实就是个数组，参数是按顺序的，分别是参数一、参数二、参数三。。。）
 
 						std::map<std::string, cv::Mat>::iterator iter;	// 从map中寻找传来的参数所对应的数据
 						iter = map_cvmat.find(params[0]);
 						
 						cv::Mat in;
-						if(iter != map_cvmat.end()) {
-							
+						if(iter != map_cvmat.end()) {							//如果在map中找到了数据
+
 							in = iter->second;		
+							std::cout<<"Running AdjustBrightness with "<<iter->first<<std::endl;
+
+							auto attributes = action["attributes"];	// 取出固定属性，这是一个包含了 key-value 的数组
+							std::string s =  attributes["alpha"];		
+							float alpha= atof(s.c_str());
+							s =  attributes["beta"];
+							float beta= atof(s.c_str());
+
+							cv::Mat out = speedbot2d::AdjustBrightness(in, alpha, beta);	//调用函数
+
+							map_cvmat.insert(std::map<std::string, cv::Mat>::value_type("AdjustBrightness_out"+std::to_string(AdjustBrightness_count), out));
+
+
+							std::cout<<"Result: AdjustBrightness_out"+std::to_string(AdjustBrightness_count) <<std::endl;
+							
+							// 封装执行结果
+							result["code"] = 200;   // code-200, 代表执行成功
+							result["data"] = { "AdjustBrightness_out"+std::to_string(AdjustBrightness_count) };  
+							
+							AdjustBrightness_count ++;
+
 						} else {
-							std::cout<<"wrong param!!!"<<std::endl;
-							//return -1;
+							std::cout<<"Wrong Params!!!"<<std::endl;
+							result["code"] = 300;		// code 300 代表没有找到输入的参数对应数据
+							result["msg"] = "Wrong Params";
 						}
 
-						auto attributes = action["attributes"];	// 取出固定属性，这是一个包含了 key-value 的数组
-						std::string s =  attributes["alpha"];
-						std::cout<<s<<std::endl;
-						float alpha= atof(s.c_str());
-
-						s =  attributes["beta"];
-						std::cout<<s<<std::endl;
-						float beta= atof(s.c_str());
-
-
-						cv::Mat out = speedbot2d::AdjustBrightness(in, alpha, beta);
-						
-						map_cvmat.insert(std::map<std::string, cv::Mat>::value_type("GammaCorrection_out"+std::to_string(GammaCorrection_count), out));
-
-
-						std::cout<<"AdjustBrightness_out"+std::to_string(AdjustBrightness_count) <<std::endl;
-						
-						// 封装执行结果
-						result["code"] = 200;   // code-200, 代表执行成功
-
-						// 加入函数执行的结果数据，分别是数据代号1、数据代号2、数据代号3...
-						result["data"] = { "AdjustBrightness_out"+std::to_string(AdjustBrightness_count) };  
-						//}
-						AdjustBrightness_count ++;
-
-
+					//GammaCorrection 图片Gamma矫正
 					} else if (action["function"] == "GammaCorrection") {
 
-						auto params = action["params"];	// 取出参数（其实就是个数组，参数是按顺序的，分别是参数一、参数二、参数三。。。）
+						auto params = action["params"];									// 取出参数（其实就是个数组，参数是按顺序的，分别是参数一、参数二、参数三。。。）
 
 						std::map<std::string, cv::Mat>::iterator iter;	// 从map中寻找传来的参数所对应的数据
 						iter = map_cvmat.find(params[0]);
 						
 						cv::Mat in;
 						if(iter != map_cvmat.end()) {
+
 							in = iter->second;		
+							std::cout<<"Running GammaCorrection with "<<iter->first<<std::endl;
+
+							auto attributes = action["attributes"];				// 取出固定属性，这是一个包含了 key-value 的数组
+							std::string s = attributes["gamma"];
+							float gamma= atof(s.c_str());
+
+							cv::Mat out = speedbot2d::GammaCorrection(in, gamma);
+
+							map_cvmat.insert(std::map<std::string, cv::Mat>::value_type("GammaCorrection_out"+std::to_string(GammaCorrection_count), out));
+
+							std::cout<<"Result: GammaCorrection_out"+std::to_string(GammaCorrection_count) <<std::endl;
+							
+							// 封装执行结果
+							result["code"] = 200;   // code-200, 代表执行成功
+							result["data"] = { "GammaCorrection_out"+std::to_string(GammaCorrection_count) };  
+
+							GammaCorrection_count ++;
+
 						} else {
-							std::cout<<"wrong param!!!"<<std::endl;
-							//return -1;
+							std::cout<<"Wrong Params!!!"<<std::endl;
+							result["code"] = 300;		// code 300 代表没有找到输入的参数对应数据
+							result["msg"] = "Wrong Params";
 						}
 
-
-						auto attributes = action["attributes"];	// 取出固定属性，这是一个包含了 key-value 的数组
-	
-						std::string s = attributes["gamma"];
-
-						std::cout<<s<<std::endl;
-						float gamma= atof(s.c_str());
-
-						cv::Mat out = speedbot2d::GammaCorrection(in, gamma);
-
-						
-						map_cvmat.insert(std::map<std::string, cv::Mat>::value_type("GammaCorrection_out"+std::to_string(GammaCorrection_count), out));
-
-						std::cout<<"GammaCorrection_out"+std::to_string(GammaCorrection_count) <<std::endl;
-						
-						// 封装执行结果
-						result["code"] = 200;   // code-200, 代表执行成功
-
-						// 加入函数执行的结果数据，分别是数据代号1、数据代号2、数据代号3...
-						result["data"] = { "GammaCorrection_out"+std::to_string(GammaCorrection_count) };  
-
-						GammaCorrection_count ++;
-
-
+					//ReadImg
         	} else if (action["function"] == "ReadImg") {
 
 						auto params = action["params"];
 
 						cv::Mat ReadImg_in = speedbot2d::ReadImg();
-						////////////////////////
-				
-						//in = speedbot2d::AutoThresholding(in, speedbot2d::AUTO_THRESHOLD_HUANG);
-				
-						////////////////////////
-						// std::map<std::string, cv::Mat>::iterator iter;	//将处理完的图片存入传来的参数对应的map结构中
-						// iter = map_cvmat.find(params[0]);	
-						// if(iter != map_cvmat.end()) {
-						// 	std::cout<<iter->first<<std::endl;
-						// 	iter->second = in;		
-						// } else {
+						
 						map_cvmat.insert(std::map<std::string, cv::Mat>::value_type("ReadImg_out"+std::to_string(ReadImg_count), ReadImg_in));
 
-						std::cout<<"ReadImg_out"+std::to_string(ReadImg_count) <<std::endl;
+						std::cout<<"Result: ReadImg_out"+std::to_string(ReadImg_count) <<std::endl;
 						
 						// 封装执行结果
 						result["code"] = 200;   // code-200, 代表执行成功
-
-						// 加入函数执行的结果数据，分别是数据代号1、数据代号2、数据代号3...
 						result["data"] = { "ReadImg_out"+std::to_string(ReadImg_count) };  
-						//}
+
 						ReadImg_count ++;
 
-						// std::vector<uchar> data_encode;	//将图片进行编码以传输
-						// imencode(".png", in, data_encode);
-						// std::string str_encode(data_encode.begin(), data_encode.end());
-						// std::cout<<"ReadImg Finish"<<std::endl;
-						// res.set_content(str_encode, "image/png");
-
+					//WriteImg
 					} else if (action["function"] == "WriteImg") {
 
 						auto params = action["params"];
 						std::map<std::string, cv::Mat>::iterator iter;	// 从map中寻找传来的参数所对应的数据
 						iter = map_cvmat.find(params[0]);
-						cv::Mat in = iter->second;
+						cv::Mat in;
+						if(iter != map_cvmat.end()) {
 
-						speedbot2d::WriteImg(in);
+							in = iter->second;		
+							std::cout<<"Running WriteImg with "<<iter->first<<std::endl;
+							speedbot2d::WriteImg(in);
 
-					}// else if (action["function"] == "ShowImg") {
+						} else {
+							std::cout<<"Wrong Params!!!"<<std::endl;
+							result["code"] = 300;		// code 300 代表没有找到输入的参数对应数据
+							result["msg"] = "Wrong Params";
+						}
 
-					// 	auto params = action["params"];
-					// 	std::map<std::string, cv::Mat>::iterator iter;	// 从map中寻找传来的参数所对应的数据
-					// 	iter = map_cvmat.find(params[0]);
-					// 	cv::Mat in = iter->second;
+					} else {	//没找到输入的函数
 
-					// 	//speedbot2d::WriteImg(in);
+						std::cout<<"Can not Find Function!!!"<<std::endl;
+						result["code"] = 250;		// code 250 代表没有找到输入的函数
+						result["msg"] = "Can not Find Function";
 
-					// 	std::vector<uchar> data_encode;	//将图片进行编码以传输
-					// 	imencode(".png", in, data_encode);
-					// 	std::string str_encode(data_encode.begin(), data_encode.end());
-					// 	std::cout<<"ShowImg Finish"<<std::endl;
-					// 	res.set_content(str_encode, "image/png");
-
-					// }
+					}
 
         }	else {
 					// 没有获取到参数
@@ -208,7 +186,7 @@ int main(int agrc, char* argv[]) {
 							//return -1;
 						}
 			
-		}
+		} 
 	});
 
 	
