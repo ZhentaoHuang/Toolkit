@@ -47,7 +47,7 @@ cv::Mat StretchContrast(const cv::Mat in_image);
 cv::Mat GetHistogram(const cv::Mat& image);
 int ComputeThresholdHuang(cv::Mat hist);
 cv::Mat AutoThresholding(const cv::Mat in_image, AutoThresholdMethod method);
-
+int EdgeDetectionLaplacian(const cv::Mat in_image, cv::Mat &out_image);
 }
 
 

@@ -138,16 +138,29 @@ cv::Mat StretchContrast(const cv::Mat in_image)
 	
 		double min_value, max_value;	//最大值，最小值
 		cv::minMaxLoc(in_image, &min_value, &max_value);	//求各通道的最大值和最小值
-
+		
+		std::cout<<min_value<<std::endl<<max_value<<std::endl;
 		if(max_value == min_value) { //如果range 为 0
 
 			return in_image;
 
 		} else {
 
+			float divisor = 0.04;
+			std::cout<<in_image.cols<<std::endl;
+			
+
 			for (int i = 0; i < in_image.rows; i++) {		//对每个像素点的操作
-				for (int j = 0; j < in_image.cols; j++) {	// x = 255 * (x - min) / range;
-						out_image.at<uchar>(i,j) = cv::saturate_cast<uchar>(255 * (in_image.at<uchar>(i,j) - min_value) / (max_value - min_value));
+				for (int j = 0; j < 2560; j++) {	// x = 255 * (x - min) / range;
+					
+						 //std::cout<<(int)in_image.at<uchar>(i,j)<<" ";
+						//out_image.at<uchar>(i,j) = cv::saturate_cast<uchar>(255 * (in_image.at<uchar>(i,j) - min_value) / (max_value - min_value));
+						out_image.at<uchar>(i,j) = cv::saturate_cast<uchar>(in_image.at<uchar>(i,j)/divisor );
+									//			std::cout<<(int)out_image.at<uchar>(i,j)<<std::endl;
+
+							
+						
+						
 				}
 			}
 		}
@@ -356,11 +369,24 @@ cv::Mat AutoThresholding(const cv::Mat in_image, AutoThresholdMethod method)
    }
 
 	return out_image;
-
-
 }
 
 
+
+int EdgeDetectionSobel(const cv::Mat in_image, cv::Mat &out_image)
+{
+	
+	return 0;
+}
+
+int EdgeDetectionLaplacian(const cv::Mat in_image, cv::Mat &out_image)
+{
+
+	cv::Laplacian(in_image,out_image,-1,3);
+	//cv::imshow("asd", out_image);
+
+	return 0;
+}
 	
 
 }
